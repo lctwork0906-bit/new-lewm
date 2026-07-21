@@ -1,0 +1,6 @@
+[2026-07-21 08:54:29,136][lewm][INFO] - Train samples: 7989, Val samples: 888
+[2026-07-21 08:54:29,174][lewm][INFO] - Model built with 3903022 params
+[2026-07-21 08:54:29,175][lewm][INFO] - Starting training...
+[2026-07-21 09:03:37,096][lewm][INFO] - Epoch 1 train loss: 1.8079
+[2026-07-21 09:04:29,366][lewm][INFO] - Epoch 1 val loss: 1.7351
+[2026-07-21 09:04:29,560][lewm][INFO] - Training complete!

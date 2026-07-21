@@ -1,0 +1,24 @@
+[2026-07-21 10:20:47,260][lewm][INFO] - Train samples: 7989, Val samples: 888
+[2026-07-21 10:20:47,298][lewm][INFO] - Model built with 3903022 params
+[2026-07-21 10:20:47,299][lewm][INFO] - Starting training...
+[2026-07-21 10:24:07,746][lewm][INFO] - Epoch 1 train loss: 1.8108
+[2026-07-21 10:24:31,329][lewm][INFO] - Epoch 1 val loss: 1.7518
+[2026-07-21 10:26:43,109][lewm][INFO] - Epoch 2 train loss: 1.7378
+[2026-07-21 10:27:01,482][lewm][INFO] - Epoch 2 val loss: 1.7282
+[2026-07-21 10:29:12,116][lewm][INFO] - Epoch 3 train loss: 1.7011
+[2026-07-21 10:29:27,114][lewm][INFO] - Epoch 3 val loss: 1.9050
+[2026-07-21 10:31:33,728][lewm][INFO] - Epoch 4 train loss: 1.6678
+[2026-07-21 10:31:48,216][lewm][INFO] - Epoch 4 val loss: 1.7667
+[2026-07-21 10:34:00,668][lewm][INFO] - Epoch 5 train loss: 1.6436
+[2026-07-21 10:34:16,761][lewm][INFO] - Epoch 5 val loss: 1.6365
+[2026-07-21 10:36:35,933][lewm][INFO] - Epoch 6 train loss: 1.6231
+[2026-07-21 10:36:51,227][lewm][INFO] - Epoch 6 val loss: 1.6714
+[2026-07-21 10:39:04,275][lewm][INFO] - Epoch 7 train loss: 1.6007
+[2026-07-21 10:39:18,727][lewm][INFO] - Epoch 7 val loss: 1.6174
+[2026-07-21 10:41:29,655][lewm][INFO] - Epoch 8 train loss: 1.5684
+[2026-07-21 10:41:44,354][lewm][INFO] - Epoch 8 val loss: 1.5453
+[2026-07-21 10:44:03,203][lewm][INFO] - Epoch 9 train loss: 1.5351
+[2026-07-21 10:44:19,292][lewm][INFO] - Epoch 9 val loss: 1.6734
+[2026-07-21 10:46:33,506][lewm][INFO] - Epoch 10 train loss: 1.5125
+[2026-07-21 10:46:47,724][lewm][INFO] - Epoch 10 val loss: 1.5277
+[2026-07-21 10:46:47,826][lewm][INFO] - Training complete!
