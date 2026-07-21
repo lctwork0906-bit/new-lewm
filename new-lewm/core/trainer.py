@@ -29,16 +29,35 @@ class Trainer:
         dataset_cfg = OmegaConf.to_container(self.cfg.data.dataset, resolve=True)
         data_path = dataset_cfg.pop("name")
 
-        self.dataset = self.strategy.load(
-            data_path,
-            keys_to_load=dataset_cfg.get("keys_to_load", ['pixels', 'action']),
-            transform=self.strategy.get_transform(self.cfg.img_size),
-            num_steps=self.cfg.data.dataset.num_steps
-        )
+        # 判断模型类型
+        model_type = getattr(self.cfg, 'model_type', '2d')
 
-        action_dim = self.dataset[0]["action"].shape[-1]
-        self.cfg.model.action_encoder.input_dim = action_dim
-        print(f"[Train] Action dimension: {action_dim}")
+        if model_type == 'voxel':
+            # 体素数据：用 voxel_key
+            voxel_key = dataset_cfg.get('voxel_key', 'voxel')
+            self.dataset = self.strategy.load(
+                data_path,
+                keys_to_load=dataset_cfg.get("keys_to_load", ['voxel', 'action']),
+                transform=self.strategy.get_transform(self.cfg.voxel_size),
+                num_steps=dataset_cfg.get('num_steps', 4),
+                voxel_key=voxel_key
+            )
+            sample = self.dataset[0]
+            action_dim = sample["action"].shape[-1]
+            self.cfg.model.action_encoder.input_dim = action_dim
+            print(f"[Train] Action dimension: {action_dim}")
+        else:
+            # 2D 数据：原有逻辑
+            self.dataset = self.strategy.load(
+                data_path,
+                keys_to_load=dataset_cfg.get("keys_to_load", ['pixels', 'action']),
+                transform=self.strategy.get_transform(self.cfg.img_size),
+                num_steps=dataset_cfg.get('num_steps', 4)
+            )
+            sample = self.dataset[0]
+            action_dim = sample["action"].shape[-1]
+            self.cfg.model.action_encoder.input_dim = action_dim
+            print(f"[Train] Action dimension: {action_dim}")
 
         train_size = int(0.9 * len(self.dataset))
         val_size = len(self.dataset) - train_size
@@ -62,11 +81,41 @@ class Trainer:
         self.logger.info(f"Train samples: {len(self.train_set)}, Val samples: {len(self.val_set)}")
 
     def _build_model(self):
-        model_cfg = OmegaConf.to_container(self.cfg.model, resolve=True)
-        model_cfg["encoder"]["in_chans"] = self.strategy.get_input_channels()
-
         import hydra
-        self.model = hydra.utils.instantiate(model_cfg)
+        model_cfg = OmegaConf.to_container(self.cfg.model, resolve=True)
+
+        model_type = getattr(self.cfg, 'model_type', '2d')
+
+        if model_type == 'voxel':
+            from core.voxel import VoxelJEPAEncoder
+            from core.model_3d import JEPA3D
+
+            voxel_spec = getattr(self.cfg, 'voxel_spec', None)
+            if voxel_spec is None:
+                from core.voxel import VoxelSpec
+                voxel_spec = VoxelSpec()
+
+            embed_dim = self.cfg.embed_dim
+            in_channels = self.strategy.get_input_channels()
+
+            encoder = VoxelJEPAEncoder(spec=voxel_spec, latent_dim=embed_dim)
+            predictor = hydra.utils.instantiate(model_cfg["predictor"])
+            action_encoder = hydra.utils.instantiate(model_cfg["action_encoder"])
+            projector = hydra.utils.instantiate(model_cfg["projector"])
+            pred_proj = hydra.utils.instantiate(model_cfg["pred_proj"])
+
+            self.model = JEPA3D(
+                encoder=encoder,
+                predictor=predictor,
+                action_encoder=action_encoder,
+                projector=projector,
+                pred_proj=pred_proj,
+            )
+        else:
+            # 2D 模型
+            model_cfg["encoder"]["in_chans"] = self.strategy.get_input_channels()
+            self.model = hydra.utils.instantiate(model_cfg)
+
         self.model = self.model.to(self.device)
 
         from legacy.module import SIGReg

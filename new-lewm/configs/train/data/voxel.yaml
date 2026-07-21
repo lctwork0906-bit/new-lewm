@@ -1,0 +1,14 @@
+dataset:
+  num_steps: 4
+  frameskip: 1
+  name: /path/to/your/voxel_data.h5
+  keys_to_load:
+    - voxel
+    - action
+    - proprio
+    - state
+  keys_to_cache:
+    - action
+    - proprio
+    - state
+  voxel_key: voxel
