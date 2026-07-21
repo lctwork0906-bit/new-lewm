@@ -1,0 +1,79 @@
+model_type: voxel
+output_model_name: lewm_voxel
+subdir: ${hydra:job.id}
+num_workers: 4
+train_split: 0.9
+seed: 3072
+embed_dim: 64
+history_size: 3
+voxel_size: 224
+trainer:
+  max_epochs: 1
+  devices: auto
+  accelerator: gpu
+  precision: bf16
+  gradient_clip_val: 1.0
+loader:
+  batch_size: 32
+  num_workers: ${num_workers}
+  persistent_workers: true
+  prefetch_factor: 2
+  pin_memory: true
+optimizer:
+  type: AdamW
+  lr: 5.0e-05
+  weight_decay: 0.001
+num_preds: 1
+loss:
+  sigreg:
+    weight: 0.09
+    kwargs:
+      knots: 17
+      num_proj: 1024
+wandb:
+  enabled: false
+data:
+  dataset:
+    num_steps: 4
+    frameskip: 1
+    name: /villa/lct25-srt/rgbd_test.h5
+    keys_to_load:
+    - voxel
+    - action
+    keys_to_cache:
+    - action
+    voxel_key: voxel
+model:
+  _target_: core.model_3d.JEPA3D
+  predictor:
+    _target_: legacy.module.ARPredictor
+    num_frames: ${history_size}
+    input_dim: ${embed_dim}
+    hidden_dim: ${embed_dim}
+    output_dim: ${embed_dim}
+    depth: 6
+    heads: 16
+    mlp_dim: 2048
+    dim_head: 64
+    dropout: 0.1
+    emb_dropout: 0.0
+  action_encoder:
+    _target_: legacy.module.Embedder
+    input_dim: ???
+    emb_dim: ${embed_dim}
+  projector:
+    _target_: legacy.module.MLP
+    input_dim: ${embed_dim}
+    output_dim: ${embed_dim}
+    hidden_dim: 2048
+    norm_fn:
+      _target_: torch.nn.BatchNorm1d
+      _partial_: true
+  pred_proj:
+    _target_: legacy.module.MLP
+    input_dim: ${embed_dim}
+    output_dim: ${embed_dim}
+    hidden_dim: 2048
+    norm_fn:
+      _target_: torch.nn.BatchNorm1d
+      _partial_: true

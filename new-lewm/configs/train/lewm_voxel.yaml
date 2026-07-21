@@ -14,7 +14,7 @@ train_split: 0.9
 seed: 3072
 embed_dim: 64
 history_size: 3
-voxel_size: [8, 24, 24]
+voxel_size: 224
 
 trainer:
   max_epochs: 100

@@ -158,7 +158,7 @@ class Trainer:
             pred_loss = output["pred_loss"]
 
             sigreg_loss = self.sigreg(emb.transpose(0, 1))
-            loss = pred_loss + self.cfg.loss.sigreg.weight * sigreg_loss
+            loss = output["loss"] + self.cfg.loss.sigreg.weight * sigreg_loss
 
             self.optimizer.zero_grad()
             loss.backward()
@@ -182,7 +182,7 @@ class Trainer:
                 emb = output["emb"]
                 pred_loss = output["pred_loss"]
                 sigreg_loss = self.sigreg(emb.transpose(0, 1))
-                loss = pred_loss + self.cfg.loss.sigreg.weight * sigreg_loss
+                loss = output["loss"] + self.cfg.loss.sigreg.weight * sigreg_loss
                 total_loss += loss.item()
         avg_loss = total_loss / len(self.val_loader)
         self.logger.info(f"Epoch {epoch+1} val loss: {avg_loss:.4f}")

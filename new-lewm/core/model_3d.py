@@ -1,5 +1,5 @@
 """
-3D 体素 JEPA 模型
+3D 体素 JEPA 模型 + 碰撞感知
 """
 import torch
 import torch.nn.functional as F
@@ -18,12 +18,10 @@ class JEPA3D(nn.Module):
 
     def encode(self, info):
         voxel = info['voxel'].float()
-        # 确保有通道维度
         if len(voxel.shape) == 5:
             voxel = voxel.unsqueeze(2)
         B, T, C, D, H, W = voxel.shape
 
-        # 展平时间和 batch
         voxel_flat = rearrange(voxel, "b t c d h w -> (b t) c d h w")
         emb = self.encoder(voxel_flat)
         emb = self.projector(emb)
@@ -47,4 +45,18 @@ class JEPA3D(nn.Module):
         tgt_emb = emb[:, 1:]
         pred_emb = self.predict(ctx_emb, ctx_act)
         pred_loss = F.mse_loss(pred_emb, tgt_emb)
-        return {"pred_loss": pred_loss, "emb": emb}
+
+        # ========== 碰撞感知损失 ==========
+        collision_loss = torch.tensor(0.0, device=emb.device)
+        if "collision_risk" in batch:
+            risk = batch["collision_risk"].float()
+            # 鼓励预测的 embedding 的最后一个时间步对应低碰撞风险
+            # 用 pred_emb 的最后一个时间步来预测碰撞风险
+            pred_risk = torch.sigmoid(pred_emb[:, -1, 0])  # 简化：用第一个维度
+            collision_loss = F.mse_loss(pred_risk, risk)
+            # 也可以加一个正则项：直接约束 emb
+            # collision_loss = F.mse_loss(pred_emb[:, -1], risk.unsqueeze(-1).expand(-1, pred_emb.shape[-1]))
+
+        total_loss = pred_loss + 0.1 * collision_loss  # 碰撞损失权重 0.1
+
+        return {"pred_loss": pred_loss, "collision_loss": collision_loss, "loss": total_loss, "emb": emb}
