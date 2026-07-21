@@ -1,0 +1,3 @@
+[2026-07-14 07:43:06,105][lewm][INFO] - Train samples: 2103059, Val samples: 233674
+[2026-07-14 07:43:07,687][lewm][INFO] - Model built with 18057438 params
+[2026-07-14 07:43:07,688][lewm][INFO] - Starting training...

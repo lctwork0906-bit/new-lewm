@@ -1,0 +1,3 @@
+- data=pusht
+- trainer.max_epochs=1
+- trainer.accelerator=cpu
